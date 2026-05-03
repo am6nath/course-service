@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: "ap-south-2"
+    ECR_REPO: "991524241826.dkr.ecr.ap-south-2.amazonaws.com/student-service"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | \
+        docker login --username AWS --password-stdin 991524241826.dkr.ecr.ap-south-2.amazonaws.com
+      - echo "Setting IMAGE_TAG from source version..."
+      - export IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}
+
+  build:
+    commands:
+      - echo "Building Docker image for student-service..."
+      - cd day2-microservices/student-service
+      - docker build -t $ECR_REPO:$IMAGE_TAG .
+      - docker tag $ECR_REPO:$IMAGE_TAG $ECR_REPO:latest
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push $ECR_REPO:$IMAGE_TAG
+      - echo "Writing imagedefinitions.json for ECS deployment..."
+      - printf '[{"name":"student-service","imageUri":"%s"}]' $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
