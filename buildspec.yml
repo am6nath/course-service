@@ -14,7 +14,7 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - cd day2-microservices/course-service
+      # - cd day2-microservices/course-service
       - docker build -t $ECR_REPO:$IMAGE_TAG .
       - docker tag $ECR_REPO:$IMAGE_TAG $ECR_REPO:latest
   post_build:
