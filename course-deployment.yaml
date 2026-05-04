@@ -42,14 +42,21 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.in/group.name: students-app
+    alb.ingress.kubernetes.io/group.name: students-app
     alb.ingress.kubernetes.io/healthcheck-path: /health
 spec:
   ingressClassName: alb
   rules:
     - http:
         paths:
-        - path: /amar-student
+        - path: /courses
+          pathType: Prefix
+          backend:
+            service:
+              name: service-course-amarnath
+              port:
+                number: 3001
+        - path: /health
           pathType: Prefix
           backend:
             service:
